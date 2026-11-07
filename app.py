@@ -529,8 +529,12 @@ def share_document(document_id):
     document = db.session.get(Document, document_id)
 
     if document is None:
+        log_activity(
+            "ACCESS_DENIED",
+            None,
+            f"Share attempt for non-existent document ID: {document_id}"
+        )
         abort(404)
-
     if document.owner_id != current_user.id:
         log_activity(
             "ACCESS_DENIED",
