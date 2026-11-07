@@ -597,6 +597,11 @@ def revoke_permission(permission_id):
     )
 
     if permission is None:
+        log_activity(
+            "ACCESS_DENIED",
+            None,
+            f"Revoke attempt for non-existent permission ID: {permission_id}"
+        )
         abort(404)
 
     if permission.document.owner_id != current_user.id:
