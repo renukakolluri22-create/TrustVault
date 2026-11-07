@@ -21,7 +21,7 @@ The application uses role-based access control and document-level permissions to
 
 ## User Roles
 
-- **Admin:** Can access the administration dashboard and manage application-level information.
+- **Admin:** Can access the administration dashboard to view users, documents, permissions and audit activity.
 - **Owner:** Can upload, manage, update, delete and share their documents.
 - **Viewer:** Can access documents shared with them according to their assigned permissions.
 
@@ -73,7 +73,7 @@ py -m pytest -v
 
 The project includes automated tests for authentication, document permissions, unauthorized access, file validation and admin dashboard access.
 
-**Latest test result:** 16 tests passed.
+**Latest test result:** 17 tests passed.
 
 ## Project Goal
 
