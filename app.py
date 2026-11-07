@@ -336,6 +336,11 @@ def download_document(document_id):
     document = db.session.get(Document, document_id)
 
     if document is None:
+        log_activity(
+            "ACCESS_DENIED",
+            None,
+            f"Download attempt for non-existent document ID: {document_id}"
+        )
         abort(404)
 
     # Allow only the owner or admin directly
