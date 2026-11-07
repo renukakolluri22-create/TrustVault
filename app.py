@@ -25,7 +25,9 @@ from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "uploads")
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 
