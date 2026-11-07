@@ -320,6 +320,7 @@ def upload_document():
 
     flash("Document uploaded successfully!")
     return redirect(url_for("dashboard"))
+
 @app.route("/download/<int:document_id>")
 @login_required
 def download_document(document_id):
@@ -328,23 +329,16 @@ def download_document(document_id):
 
     if document is None:
         abort(404)
-    
-    permission = DocumentPermission.query.filter_by(
-        document_id=document.id,
-        user_id=current_user.id
-    ).first()
 
-       
     # Allow only the owner or admin directly
     if document.owner_id != current_user.id and current_user.role != "admin":
 
-        # Check whether the current user still has permission
         permission = DocumentPermission.query.filter_by(
             document_id=document.id,
             user_id=current_user.id
         ).first()
 
-        # No permission means access must be denied
+        # Deny access if the user has no sharing permission
         if permission is None:
             log_activity(
                 "ACCESS_DENIED",
@@ -365,7 +359,6 @@ def download_document(document_id):
         as_attachment=True,
         download_name=document.filename
     )
-
 
 
 @app.route("/update/<int:document_id>", methods=["POST"])
