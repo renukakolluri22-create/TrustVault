@@ -1,0 +1,287 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrustVault Dashboard</title>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+        h1 {
+            color: green;
+            text-align: center;
+        }
+        h2 {
+            color: #234;
+        }
+        .upload-box {
+            background: #f4f8fc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        input, button {
+            padding: 12px;
+            margin: 8px 0;
+        }
+        button {
+            background: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .document {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
+            color: green;
+            font-weight: bold;
+        }
+        .logout {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Welcome to TrustVault</h1>
+    <h2>Dashboard</h2>
+    <p>Welcome, {{ current_user.name }}!</p>
+    <p>Your role: {{ current_user.role }}</p>
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p class="message">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+    {% if current_user.role == "owner" or current_user.role == "admin" %}
+    <div class="upload-box">
+        <h2>Upload Document</h2>
+        <form method="POST"
+      action="{{ url_for('upload_document') }}"
+      enctype="multipart/form-data">
+
+    <input type="hidden" name="csrf_token"
+           value="{{ csrf_token() }}">
+
+    <input type="file" name="document"
+           accept=".pdf,.doc,.docx,.txt"
+           required>
+
+    <br><br>
+
+    <label for="category">Select Document Category:</label>
+
+    <select name="category" id="category" required>
+        <option value="">-- Select Category --</option>
+        <option value="Education">Education</option>
+        <option value="Work">Work</option>
+        <option value="Certificates">Certificates</option>
+        <option value="Projects">Projects</option>
+        <option value="Personal">Personal</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Upload Document</button>
+
+</form>
+    </div>
+    {% endif %}
+    
+
+<h2>Search Documents</h2>
+
+<form method="GET" action="{{ url_for('dashboard') }}">
+
+    <input type="text"
+           name="search"
+           placeholder="Search by document name"
+           value="{{ search }}">
+    <input type="text"
+       name="owner_search"
+       placeholder="Search by owner name"
+       value="{{ owner_search }}">
+    <select name="category">
+        <option value="">All Categories</option>
+        <option value="Education">Education</option>
+        <option value="Work">Work</option>
+        <option value="Certificates">Certificates</option>
+        <option value="Projects">Projects</option>
+        <option value="Personal">Personal</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <label for="upload_date">Search by Upload Date:</label>
+
+    <input type="date"
+           id="upload_date"
+           name="upload_date"
+           value="{{ upload_date }}">
+
+    <button type="submit">Search</button>
+
+    <a href="{{ url_for('dashboard') }}">Clear Search</a>
+
+</form>
+
+
+    <h2>My Documents</h2>
+    {% if documents %}
+        {% for document in documents %}
+            <div class="document">
+                <strong>{{ document.filename }}</strong>
+
+                <p>
+                    Category: {{ document.category or "Uncategorized" }}
+                </p>
+
+<p>Uploaded: {{ document.uploaded_at }}</p>
+                <a href="{{ url_for('download_document',
+                           document_id=document.id) }}">
+                    Download
+                </a>
+                <form method="POST"
+      action="{{ url_for('delete_document', document_id=document.id) }}"
+      onsubmit="return confirm('Are you sure you want to delete this document?');">
+
+    <input type="hidden" name="csrf_token"
+           value="{{ csrf_token() }}">
+
+    <button type="submit" class="logout">
+        Delete Document
+    </button>
+</form>
+                <h3>Update My Document</h3>
+
+<form method="POST"
+      action="{{ url_for('update_document', document_id=document.id) }}"
+      enctype="multipart/form-data">
+
+    <input type="hidden" name="csrf_token"
+           value="{{ csrf_token() }}">
+
+    <input type="file" name="document"
+           accept=".pdf,.doc,.docx,.txt"
+           required>
+
+    <button type="submit">Upload Updated Version</button>
+</form>
+                <h3>Share Document</h3>
+
+<form method="POST"
+      action="{{ url_for('share_document', document_id=document.id) }}">
+
+    <input type="hidden" name="csrf_token"
+           value="{{ csrf_token() }}">
+
+    <input type="email" name="email"
+           placeholder="Enter registered user's email"
+           required>
+
+    <select name="permission" required>
+        <option value="read">Read Permission</option>
+        <option value="edit">Edit Permission</option>
+    </select>
+
+    <button type="submit">Share Document</button>
+</form>
+<h3>Shared Users and Permissions</h3>
+
+{% for permission in document.permissions %}
+    <p>
+        User: {{ permission.user.email }}
+        <br>
+        Permission: {{ permission.permission }}
+    </p>
+
+    <form method="POST"
+          action="{{ url_for('revoke_permission',
+                             permission_id=permission.id) }}">
+
+        <input type="hidden" name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <button type="submit">
+            Revoke Access
+        </button>
+    </form>
+{% else %}
+    <p>No users have access to this document.</p>
+{% endfor %}
+
+
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No documents uploaded yet.</p>
+    {% endif %}
+    <h2>Documents Shared With Me</h2>
+    {% if shared_documents %}
+    {% for document in shared_documents %}
+        <div class="document">
+            <strong>{{ document.filename }}</strong>
+            <p>
+               Category: {{ document.category or "Uncategorized" }}
+            </p>
+            <p>Uploaded: {{ document.uploaded_at }}</p>
+
+            <a href="{{ url_for('download_document',
+                       document_id=document.id) }}">
+                Download
+            </a>
+
+            {% for permission in document.permissions %}
+                {% if permission.user_id == current_user.id
+                      and permission.permission == "edit" %}
+
+                    <h3>Update Document</h3>
+
+                    <form method="POST"
+                          action="{{ url_for('update_document',
+                                             document_id=document.id) }}"
+                          enctype="multipart/form-data">
+
+                        <input type="hidden" name="csrf_token"
+                               value="{{ csrf_token() }}">
+
+                        <input type="file" name="document"
+                               accept=".pdf,.doc,.docx,.txt"
+                               required>
+
+                        <button type="submit">
+                            Upload Updated Version
+                        </button>
+                    </form>
+
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% else %}
+    {% if search %}
+        <p>No matching documents found.</p>
+    {% else %}
+        <p>No documents have been shared with you yet.</p>
+    {% endif %}
+{% endif %}
+    <form method="POST" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf_token"
+               value="{{ csrf_token() }}">
+        <button class="logout" type="submit">Logout</button>
+    </form>
+</div>
+</body>
+</html>

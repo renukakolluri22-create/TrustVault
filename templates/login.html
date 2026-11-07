@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrustVault Login</title>
+
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: Arial;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        .login-box {
+            background: white;
+            width: 350px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        h1 {
+            color: green;
+        }
+
+        input, button {
+            width: 90%;
+            padding: 12px;
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-box">
+
+        <h1>Welcome to TrustVault</h1>
+        <h2>Login</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <input type="email" name="email"
+                   placeholder="Enter Email" required>
+
+            <input type="password" name="password"
+                   placeholder="Enter Password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p>Don't have an account?
+            <a href="{{ url_for('register') }}">Register</a>
+        </p>
+
+    </div>
+</body>
+</html>

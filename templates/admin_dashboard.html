@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrustVault Admin Dashboard</title>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+            padding: 25px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+        h1, h2 {
+            color: #12345a;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #d9eaf7;
+        }
+        .logout {
+            background-color: #b52b45;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>TrustVault Admin Dashboard</h1>
+    <h2>Welcome, {{ current_user.name }}!</h2>
+    <p>Your role: Admin</p>
+    <hr>
+    <h2>All Registered Users</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>All Uploaded Documents</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Document Name</th>
+            <th>Owner</th>
+            <th>Uploaded Date</th>
+            <th>Download</th>
+        </tr>
+        {% for document in documents %}
+        <tr>
+            <td>{{ document.id }}</td>
+            <td>{{ document.filename }}</td>
+            <td>{{ document.owner.name }}</td>
+            <td>{{ document.uploaded_at }}</td>
+            <td>
+                <a href="{{ url_for('download_document', document_id=document.id) }}">
+                   Download
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Document Sharing Permissions</h2>
+    <table>
+        <tr>
+            <th>Document</th>
+            <th>Shared With</th>
+            <th>Permission</th>
+        </tr>
+        {% for permission in permissions %}
+        <tr>
+            <td>{{ permission.document.filename }}</td>
+            <td>{{ permission.user.email }}</td>
+            <td>{{ permission.permission }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <hr>
+
+    <h2>Audit Activity</h2>
+
+    <table>
+        <tr>
+            <th>User</th>
+            <th>Document</th>
+            <th>Action</th>
+            <th>Details</th>
+            <th>Date and Time</th>
+        </tr>
+
+        {% for log in audit_logs %}
+        <tr>
+            <td>
+                {% if log.user %}
+                    {{ log.user.name }}
+                {% else %}
+                    Unknown
+                {% endif %}
+            </td>
+
+            <td>
+                {{ log.document_name or (log.document.filename if log.document else "N/A") }}
+            </td>
+
+            <td>{{ log.action }}</td>
+            <td>{{ log.details }}</td>
+            <td>{{ log.timestamp }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">No activity recorded yet.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <form action="{{ url_for('logout') }}" method="POST">
+        <input type="hidden" name="csrf_token"
+               value="{{ csrf_token() }}">
+        <button class="logout" type="submit">Logout</button>
+    </form>
+</div>
+</body>
+</html>
