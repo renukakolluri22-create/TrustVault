@@ -197,26 +197,32 @@ def dashboard():
         ).filter(
             User.name.ilike(f"%{owner_search}%")
         )    
-    if upload_date:
-        selected_date = datetime.strptime(
-            upload_date, "%Y-%m-%d"
-        ).date()
+        if upload_date:
+            try:
+                selected_date = datetime.strptime(
+                    upload_date, "%Y-%m-%d"
+                ).date()
 
-        start_date = datetime.combine(
-            selected_date, datetime.min.time()
-        )
+                start_date = datetime.combine(
+                    selected_date, datetime.min.time()
+                )
 
-        end_date = start_date + timedelta(days=1)
+                end_date = start_date + timedelta(days=1)
 
-        documents_query = documents_query.filter(
-            Document.uploaded_at >= start_date,
-            Document.uploaded_at < end_date
-        )
+                documents_query = documents_query.filter(
+                    Document.uploaded_at >= start_date,
+                    Document.uploaded_at < end_date
+                )
 
-        shared_query = shared_query.filter(
-            Document.uploaded_at >= start_date,
-            Document.uploaded_at < end_date
-        )
+                shared_query = shared_query.filter(
+                    Document.uploaded_at >= start_date,
+                    Document.uploaded_at < end_date
+                )
+
+            except ValueError:
+                flash("Invalid date format. Please select a valid date.")
+                upload_date = ""
+
     documents = documents_query.order_by(
         Document.uploaded_at.desc()
     ).all()
