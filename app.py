@@ -671,8 +671,9 @@ def file_too_large(error):
     return "File is too large. Maximum size is 10 MB.", 413
 
 
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
+with app.app_context():
+    db.create_all()
 
+
+if __name__ == "__main__":
     app.run(debug=False)
