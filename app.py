@@ -670,9 +670,19 @@ def create_admin():
 def file_too_large(error):
     return "File is too large. Maximum size is 10 MB.", 413
 
-
 with app.app_context():
     db.create_all()
+
+    admin_email = os.environ.get("TRUSTVAULT_ADMIN_EMAIL")
+
+    if admin_email:
+        user = User.query.filter_by(
+            email=admin_email.strip().lower()
+        ).first()
+
+        if user:
+            user.role = "admin"
+            db.session.commit()
 
 
 if __name__ == "__main__":
